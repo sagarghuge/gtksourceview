@@ -2225,14 +2225,6 @@ gtk_source_view_paint_right_margin (GtkSourceView *view,
 
 	g_return_if_fail (view->priv->right_margin_line_color != NULL);
 
-	if (view->priv->cached_right_margin_pos < 0)
-	{
-		view->priv->cached_right_margin_pos =
-			calculate_real_tab_width (view,
-						  view->priv->right_margin_pos,
-						  '_');
-	}
-
 #ifdef ENABLE_PROFILE
 	if (timer == NULL)
 		timer = g_timer_new ();
@@ -2304,6 +2296,22 @@ gtk_source_view_draw (GtkWidget *widget,
 
 	view = GTK_SOURCE_VIEW (widget);
 	text_view = GTK_TEXT_VIEW (widget);
+
+	if (view->priv->cached_right_margin_pos < 0)
+	{
+		view->priv->cached_right_margin_pos =
+			calculate_real_tab_width (view,
+						  view->priv->right_margin_pos,
+						  '_');
+	}
+
+	gint alloc_w = gtk_widget_get_allocated_width (GTK_WIDGET (view));
+	gint left_margin = (alloc_w - view->priv->cached_right_margin_pos) / 2;
+	if (left_margin > 0)
+	{
+		/* FIXME: stop this draw and queua a new one after resize is done? */
+		gtk_source_gutter_set_margin (view->priv->left_gutter, left_margin, 0);
+	}
 
 	window = gtk_text_view_get_window (text_view, GTK_TEXT_WINDOW_TEXT);
 

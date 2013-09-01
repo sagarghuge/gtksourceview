@@ -57,7 +57,9 @@ enum
 	PROP_VIEW,
 	PROP_WINDOW_TYPE,
 	PROP_XPAD,
-	PROP_YPAD
+	PROP_YPAD,
+	PROP_LEFT_MARGIN,
+	PROP_RIGHT_MARGIN
 };
 
 typedef struct
@@ -97,6 +99,8 @@ struct _GtkSourceGutterPrivate
 
 	gint xpad;
 	gint ypad;
+	gint left_margin;
+	gint right_margin;
 
 	guint signals[LAST_EXTERNAL_SIGNAL];
 
@@ -420,6 +424,8 @@ calculate_gutter_size (GtkSourceGutter  *gutter,
 		total_width += gutter->priv->xpad;
 	}
 
+	total_width += gutter->priv->left_margin + gutter->priv->right_margin;
+
 	return total_width;
 }
 
@@ -496,6 +502,14 @@ gtk_source_gutter_set_property (GObject       *object,
 			break;
 		case PROP_YPAD:
 			set_ypad (self, g_value_get_int (value), TRUE);
+			break;
+		case PROP_LEFT_MARGIN:
+			self->priv->left_margin = g_value_get_int (value);
+			update_gutter_size (self);
+			break;
+		case PROP_RIGHT_MARGIN:
+			self->priv->right_margin = g_value_get_int (value);
+			update_gutter_size (self);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -581,6 +595,26 @@ gtk_source_gutter_class_init (GtkSourceGutterClass *klass)
 	                                 g_param_spec_int ("ypad",
 	                                                   _("Y Padding"),
 	                                                   _("The y-padding"),
+	                                                   -1,
+	                                                   G_MAXINT,
+	                                                   0,
+	                                                   G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+
+	g_object_class_install_property (object_class,
+	                                 PROP_LEFT_MARGIN,
+	                                 g_param_spec_int ("left-margin",
+	                                                   _("Left Marging"),
+	                                                   _("The left margin before the renderers"),
+	                                                   -1,
+	                                                   G_MAXINT,
+	                                                   0,
+	                                                   G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+
+	g_object_class_install_property (object_class,
+	                                 PROP_RIGHT_MARGIN,
+	                                 g_param_spec_int ("right-margin",
+	                                                   _("Right Marging"),
+	                                                   _("The right margin before the renderers"),
 	                                                   -1,
 	                                                   G_MAXINT,
 	                                                   0,
@@ -996,6 +1030,8 @@ on_view_draw (GtkSourceView   *view,
 
 	i = 0;
 	x = 0;
+
+	cairo_translate (cr, gutter->priv->left_margin, 0);
 
 	background_area.x = 0;
 	background_area.height = get_lines (text_view,
@@ -1610,6 +1646,53 @@ gtk_source_gutter_get_padding (GtkSourceGutter *gutter,
 	if (ypad)
 	{
 		*ypad = gutter->priv->ypad;
+	}
+}
+
+void
+gtk_source_gutter_set_margin (GtkSourceGutter *gutter,
+                              gint             left,
+                              gint             right)
+{
+	gboolean update = FALSE;
+
+	g_return_if_fail (GTK_SOURCE_IS_GUTTER (gutter));
+
+	if (left != gutter->priv->left_margin)
+	{
+		gutter->priv->left_margin = left;
+		g_object_notify (G_OBJECT (gutter), "left-margin");
+		update = TRUE;
+	}
+
+	if (right != gutter->priv->right_margin)
+	{
+		gutter->priv->right_margin = right;
+		g_object_notify (G_OBJECT (gutter), "right-margin");
+		update = TRUE;
+	}
+
+	if (update)
+	{
+		update_gutter_size (gutter);
+	}
+}
+
+void
+gtk_source_gutter_get_margin (GtkSourceGutter *gutter,
+                              gint            *left,
+                              gint            *right)
+{
+	g_return_if_fail (GTK_SOURCE_IS_GUTTER (gutter));
+
+	if (left)
+	{
+		*left = gutter->priv->left_margin;
+	}
+
+	if (right)
+	{
+		*right = gutter->priv->right_margin;
 	}
 }
 
