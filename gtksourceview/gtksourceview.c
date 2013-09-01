@@ -2305,12 +2305,13 @@ gtk_source_view_draw (GtkWidget *widget,
 						  '_');
 	}
 
+	/* FIXME: take into account the gutters size */
 	gint alloc_w = gtk_widget_get_allocated_width (GTK_WIDGET (view));
 	gint left_margin = (alloc_w - view->priv->cached_right_margin_pos) / 2;
 	if (left_margin > 0)
 	{
 		/* FIXME: stop this draw and queua a new one after resize is done? */
-		gtk_source_gutter_set_margin (view->priv->left_gutter, left_margin, 0);
+		gtk_source_gutter_set_width_request (view->priv->left_gutter, left_margin);
 	}
 
 	window = gtk_text_view_get_window (text_view, GTK_TEXT_WINDOW_TEXT);

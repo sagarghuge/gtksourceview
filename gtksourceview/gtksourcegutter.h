@@ -75,13 +75,11 @@ void gtk_source_gutter_get_padding              (GtkSourceGutter         *gutter
                                                  gint                    *xpad,
                                                  gint                    *ypad);
 
-void gtk_source_gutter_set_margin               (GtkSourceGutter         *gutter,
-                                                 gint                     left,
-                                                 gint                     right);
+void gtk_source_gutter_set_width_request        (GtkSourceGutter         *gutter,
+                                                 gint                     width);
 
-void gtk_source_gutter_get_margin               (GtkSourceGutter         *gutter,
-                                                 gint                    *left,
-                                                 gint                    *right);
+void gtk_source_gutter_get_width_request        (GtkSourceGutter         *gutter,
+                                                 gint                    *width);
 
 GtkSourceGutterRenderer *
      gtk_source_gutter_get_renderer_at_pos      (GtkSourceGutter         *gutter,

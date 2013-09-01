@@ -58,8 +58,7 @@ enum
 	PROP_WINDOW_TYPE,
 	PROP_XPAD,
 	PROP_YPAD,
-	PROP_LEFT_MARGIN,
-	PROP_RIGHT_MARGIN
+	PROP_WIDTH_REQUEST
 };
 
 typedef struct
@@ -97,10 +96,9 @@ struct _GtkSourceGutterPrivate
 
 	GList *renderers;
 
+	gint width_request;
 	gint xpad;
 	gint ypad;
-	gint left_margin;
-	gint right_margin;
 
 	guint signals[LAST_EXTERNAL_SIGNAL];
 
@@ -382,10 +380,12 @@ do_redraw (GtkSourceGutter *gutter)
 
 static gint
 calculate_gutter_size (GtkSourceGutter  *gutter,
+                       gint             *renderers_offset,
                        GArray           *sizes)
 {
 	GList *item;
 	gint total_width = 0;
+	gint offset = 0;
 
 	/* Calculate size */
 	for (item = gutter->priv->renderers; item; item = g_list_next (item))
@@ -424,7 +424,16 @@ calculate_gutter_size (GtkSourceGutter  *gutter,
 		total_width += gutter->priv->xpad;
 	}
 
-	total_width += gutter->priv->left_margin + gutter->priv->right_margin;
+	if (total_width < gutter->priv->width_request)
+	{
+		offset = gutter->priv->width_request - total_width;
+		total_width = gutter->priv->width_request;
+	}
+
+	if (renderers_offset)
+	{
+		*renderers_offset = offset;
+	}
 
 	return total_width;
 }
@@ -434,7 +443,7 @@ update_gutter_size (GtkSourceGutter *gutter)
 {
 	gint width;
 
-	width = calculate_gutter_size (gutter, NULL);
+	width = calculate_gutter_size (gutter, NULL, NULL);
 
 	gtk_text_view_set_border_window_size (GTK_TEXT_VIEW (gutter->priv->view),
 	                                      gutter->priv->window_type,
@@ -481,6 +490,20 @@ set_ypad (GtkSourceGutter *gutter,
 	return set_padding (gutter, &gutter->priv->ypad, ypad, "ypad", resize);
 }
 
+static gboolean
+set_width_request (GtkSourceGutter *gutter,
+                   gint             width)
+{
+	if (width != gutter->priv->width_request)
+	{
+		gutter->priv->width_request = width;
+		update_gutter_size (gutter);
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 static void
 gtk_source_gutter_set_property (GObject       *object,
                                 guint          prop_id,
@@ -503,13 +526,8 @@ gtk_source_gutter_set_property (GObject       *object,
 		case PROP_YPAD:
 			set_ypad (self, g_value_get_int (value), TRUE);
 			break;
-		case PROP_LEFT_MARGIN:
-			self->priv->left_margin = g_value_get_int (value);
-			update_gutter_size (self);
-			break;
-		case PROP_RIGHT_MARGIN:
-			self->priv->right_margin = g_value_get_int (value);
-			update_gutter_size (self);
+		case PROP_WIDTH_REQUEST:
+			set_width_request (self, g_value_get_int (value));
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -601,20 +619,10 @@ gtk_source_gutter_class_init (GtkSourceGutterClass *klass)
 	                                                   G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 
 	g_object_class_install_property (object_class,
-	                                 PROP_LEFT_MARGIN,
-	                                 g_param_spec_int ("left-margin",
-	                                                   _("Left Marging"),
-	                                                   _("The left margin before the renderers"),
-	                                                   -1,
-	                                                   G_MAXINT,
-	                                                   0,
-	                                                   G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-
-	g_object_class_install_property (object_class,
-	                                 PROP_RIGHT_MARGIN,
-	                                 g_param_spec_int ("right-margin",
-	                                                   _("Right Marging"),
-	                                                   _("The right margin before the renderers"),
+	                                 PROP_WIDTH_REQUEST,
+	                                 g_param_spec_int ("width-request",
+	                                                   _("Width Request"),
+	                                                   _("The minimal size of the gutter"),
 	                                                   -1,
 	                                                   G_MAXINT,
 	                                                   0,
@@ -954,6 +962,7 @@ on_view_draw (GtkSourceView   *view,
 	GdkWindow *window;
 	GtkTextView *text_view;
 	GArray *sizes;
+	gint offset;
 	GdkRectangle clip;
 	gint x, y;
 	gint y1, y2;
@@ -1026,12 +1035,12 @@ on_view_draw (GtkSourceView   *view,
 	heights = g_array_new (FALSE, FALSE, sizeof (gint));
 	sizes = g_array_new (FALSE, FALSE, sizeof (gint));
 
-	calculate_gutter_size (gutter, sizes);
+	calculate_gutter_size (gutter, &offset, sizes);
+
+	cairo_translate (cr, offset, 0);
 
 	i = 0;
 	x = 0;
-
-	cairo_translate (cr, gutter->priv->left_margin, 0);
 
 	background_area.x = 0;
 	background_area.height = get_lines (text_view,
@@ -1650,50 +1659,25 @@ gtk_source_gutter_get_padding (GtkSourceGutter *gutter,
 }
 
 void
-gtk_source_gutter_set_margin (GtkSourceGutter *gutter,
-                              gint             left,
-                              gint             right)
+gtk_source_gutter_set_width_request (GtkSourceGutter *gutter,
+                                     gint             width)
 {
-	gboolean update = FALSE;
-
 	g_return_if_fail (GTK_SOURCE_IS_GUTTER (gutter));
 
-	if (left != gutter->priv->left_margin)
+	if (set_width_request (gutter, width))
 	{
-		gutter->priv->left_margin = left;
-		g_object_notify (G_OBJECT (gutter), "left-margin");
-		update = TRUE;
-	}
-
-	if (right != gutter->priv->right_margin)
-	{
-		gutter->priv->right_margin = right;
-		g_object_notify (G_OBJECT (gutter), "right-margin");
-		update = TRUE;
-	}
-
-	if (update)
-	{
-		update_gutter_size (gutter);
+		g_object_notify (G_OBJECT (gutter), "width-request");
 	}
 }
 
 void
-gtk_source_gutter_get_margin (GtkSourceGutter *gutter,
-                              gint            *left,
-                              gint            *right)
+gtk_source_gutter_get_width_request (GtkSourceGutter *gutter,
+                                     gint            *width)
 {
 	g_return_if_fail (GTK_SOURCE_IS_GUTTER (gutter));
+	g_return_if_fail (width != NULL);
 
-	if (left)
-	{
-		*left = gutter->priv->left_margin;
-	}
-
-	if (right)
-	{
-		*right = gutter->priv->right_margin;
-	}
+	*width = gutter->priv->width_request;
 }
 
 /**
