@@ -220,6 +220,8 @@ static void 	gtk_source_view_get_lines			(GtkTextView       *text_view,
 								 gint              *countp);
 static gboolean gtk_source_view_draw 			(GtkWidget         *widget,
 								 cairo_t           *cr);
+static void	gtk_source_view_size_allocate		(GtkWidget         *widget,
+								 GdkRectangle      *allocation);
 static void	gtk_source_view_move_lines			(GtkSourceView     *view,
 								 gboolean           copy,
 								 gint               step);
@@ -285,6 +287,7 @@ gtk_source_view_class_init (GtkSourceViewClass *klass)
 
 	widget_class->key_press_event = gtk_source_view_key_press_event;
 	widget_class->draw = gtk_source_view_draw;
+	widget_class->size_allocate = gtk_source_view_size_allocate;
 	widget_class->style_updated = gtk_source_view_style_updated;
 	widget_class->realize = gtk_source_view_realize;
 
@@ -2297,23 +2300,6 @@ gtk_source_view_draw (GtkWidget *widget,
 	view = GTK_SOURCE_VIEW (widget);
 	text_view = GTK_TEXT_VIEW (widget);
 
-	if (view->priv->cached_right_margin_pos < 0)
-	{
-		view->priv->cached_right_margin_pos =
-			calculate_real_tab_width (view,
-						  view->priv->right_margin_pos,
-						  '_');
-	}
-
-	/* FIXME: take into account the gutters size */
-	gint alloc_w = gtk_widget_get_allocated_width (GTK_WIDGET (view));
-	gint left_margin = (alloc_w - view->priv->cached_right_margin_pos) / 2;
-	if (left_margin > 0)
-	{
-		/* FIXME: stop this draw and queua a new one after resize is done? */
-		gtk_source_gutter_set_width_request (view->priv->left_gutter, left_margin);
-	}
-
 	window = gtk_text_view_get_window (text_view, GTK_TEXT_WINDOW_TEXT);
 
 	cairo_save (cr);
@@ -2429,6 +2415,45 @@ gtk_source_view_draw (GtkWidget *widget,
 	cairo_restore (cr);
 
 	return event_handled;
+}
+
+static void
+gtk_source_view_size_allocate (GtkWidget    *widget,
+                               GdkRectangle *allocation)
+{
+	GtkSourceView *view = GTK_SOURCE_VIEW (widget);
+	int prev_w;
+
+	prev_w = gtk_widget_get_allocated_width (widget);
+
+	if (view->priv->cached_right_margin_pos < 0)
+	{
+		view->priv->cached_right_margin_pos =
+			calculate_real_tab_width (view,
+						  view->priv->right_margin_pos,
+						  '_');
+	}
+
+	if (prev_w != allocation->width)
+	{
+		/* FIXME: take into account the gutters size */
+		gint left_margin = (allocation->width - view->priv->cached_right_margin_pos) / 2;
+		if (left_margin > 0)
+		{
+			GdkFrameClock *clock;
+
+			clock = gtk_widget_get_frame_clock (widget);
+			if (clock == NULL)
+				gdk_frame_clock_request_phase (clock, GDK_FRAME_CLOCK_PHASE_LAYOUT);
+
+			gtk_source_gutter_set_width_request (view->priv->left_gutter, left_margin);
+
+			if (clock == NULL)
+				gdk_frame_clock_request_phase (clock, GDK_FRAME_CLOCK_PHASE_LAYOUT);
+		}
+	}
+
+	GTK_WIDGET_CLASS (gtk_source_view_parent_class)->size_allocate (widget, allocation);
 }
 
 /*
