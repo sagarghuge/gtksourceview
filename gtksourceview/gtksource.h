@@ -30,6 +30,7 @@
 #include <gtksourceview/gtksourcecompletionprovider.h>
 #include <gtksourceview/gtksourcegutter.h>
 #include <gtksourceview/gtksourcegutterrenderer.h>
+#include <gtksourceview/gtksourcegutterrendererfolds.h>
 #include <gtksourceview/gtksourcegutterrenderertext.h>
 #include <gtksourceview/gtksourcegutterrendererpixbuf.h>
 #include <gtksourceview/gtksourcelanguage.h>

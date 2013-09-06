@@ -32,6 +32,13 @@ test_completion_LDADD = 		\
 	$(DEP_LIBS)			\
 	$(TESTS_LIBS)
 
+TEST_PROGS += test-folding
+test_folding_SOURCES = test-folding.c
+test_folding_LDADD =						\
+	$(top_builddir)/gtksourceview/libgtksourceview-3.0.la	\
+	$(DEP_LIBS)						\
+	$(TESTS_LIBS)
+
 TEST_PROGS += test-search
 test_search_SOURCES =		\
 	test-search.c		\

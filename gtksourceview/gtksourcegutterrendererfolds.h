@@ -51,7 +51,9 @@ struct _GtkSourceGutterRendererFoldsClass
 	gpointer padding[10];
 };
 
-GType gtk_source_gutter_renderer_folds_get_type (void) G_GNUC_CONST;
+GType			 gtk_source_gutter_renderer_folds_get_type	(void) G_GNUC_CONST;
+
+GtkSourceGutterRenderer	*gtk_source_gutter_renderer_folds_new		(void);
 
 G_END_DECLS
 
