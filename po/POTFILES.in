@@ -122,6 +122,7 @@ gtksourceview/gtksourcecompletionmodel.c
 gtksourceview/gtksourcecontextengine.c
 gtksourceview/gtksourcegutter.c
 gtksourceview/gtksourcegutterrenderer.c
+gtksourceview/gtksourcegutterrendererfolds.c
 gtksourceview/gtksourcegutterrendererpixbuf.c
 gtksourceview/gtksourcegutterrenderertext.c
 gtksourceview/gtksourcelanguage.c

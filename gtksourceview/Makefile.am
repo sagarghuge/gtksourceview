@@ -32,6 +32,7 @@ libgtksourceview_headers =			\
 	gtksourcecompletionprovider.h		\
 	gtksourcegutter.h			\
 	gtksourcegutterrenderer.h		\
+	gtksourcegutterrendererfolds.h		\
 	gtksourcegutterrendererpixbuf.h		\
 	gtksourcegutterrenderertext.h		\
 	gtksourcelanguage.h			\
@@ -99,6 +100,7 @@ libgtksourceview_c_files = \
 	gtksourcecompletionprovider.c	\
 	gtksourcegutter.c		\
 	gtksourcegutterrenderer.c	\
+	gtksourcegutterrendererfolds.c	\
 	gtksourcegutterrendererpixbuf.c	\
 	gtksourcegutterrenderertext.c	\
 	gtksourcelanguage.c 		\

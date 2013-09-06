@@ -35,6 +35,7 @@ typedef struct _GtkSourceCompletionProposal	GtkSourceCompletionProposal;
 typedef struct _GtkSourceCompletionProvider	GtkSourceCompletionProvider;
 typedef struct _GtkSourceGutter			GtkSourceGutter;
 typedef struct _GtkSourceGutterRenderer		GtkSourceGutterRenderer;
+typedef struct _GtkSourceGutterRendererFolds	GtkSourceGutterRendererFolds;
 typedef struct _GtkSourceGutterRendererPixbuf	GtkSourceGutterRendererPixbuf;
 typedef struct _GtkSourceGutterRendererText	GtkSourceGutterRendererText;
 typedef struct _GtkSourceLanguage		GtkSourceLanguage;
