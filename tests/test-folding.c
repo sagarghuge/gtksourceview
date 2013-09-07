@@ -21,17 +21,6 @@
 
 #include <gtksourceview/gtksource.h>
 
-static void
-add_folds_gutter (GtkSourceView *view)
-{
-	GtkSourceGutter *gutter;
-	GtkSourceGutterRenderer *renderer;
-
-	gutter = gtk_source_view_get_gutter (view, GTK_TEXT_WINDOW_LEFT);
-	renderer = gtk_source_gutter_renderer_folds_new ();
-	gtk_source_gutter_insert (gutter, renderer, 0);
-}
-
 int
 main (int argc, char *argv[])
 {
@@ -51,7 +40,7 @@ main (int argc, char *argv[])
 	source_view = gtk_source_view_new ();
 	gtk_container_add (GTK_CONTAINER (sw), source_view);
 
-	add_folds_gutter (GTK_SOURCE_VIEW (source_view));
+	gtk_source_view_set_show_code_folding (GTK_SOURCE_VIEW (source_view), TRUE);
 
 	gtk_widget_show_all (window);
 

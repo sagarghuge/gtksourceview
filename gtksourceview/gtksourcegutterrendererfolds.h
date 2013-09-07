@@ -22,8 +22,8 @@
 #ifndef __GTK_SOURCE_GUTTER_RENDERER_FOLDS_H__
 #define __GTK_SOURCE_GUTTER_RENDERER_FOLDS_H__
 
-#include <gtksourceview/gtksourcetypes.h>
-#include <gtksourceview/gtksourcegutterrenderer.h>
+#include "gtksourcetypes-private.h"
+#include "gtksourcegutterrenderer.h"
 
 G_BEGIN_DECLS
 
@@ -47,12 +47,12 @@ struct _GtkSourceGutterRendererFolds
 struct _GtkSourceGutterRendererFoldsClass
 {
 	GtkSourceGutterRendererClass parent_class;
-
-	gpointer padding[10];
 };
 
+G_GNUC_INTERNAL
 GType			 gtk_source_gutter_renderer_folds_get_type	(void) G_GNUC_CONST;
 
+G_GNUC_INTERNAL
 GtkSourceGutterRenderer	*gtk_source_gutter_renderer_folds_new		(void);
 
 G_END_DECLS

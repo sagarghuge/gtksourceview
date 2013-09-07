@@ -47,6 +47,7 @@
 #include "gtksourcegutter-private.h"
 #include "gtksourcegutterrendererlines.h"
 #include "gtksourcegutterrenderermarks.h"
+#include "gtksourcegutterrendererfolds.h"
 
 /**
  * SECTION:view
@@ -110,6 +111,7 @@ enum {
 	PROP_COMPLETION,
 	PROP_SHOW_LINE_NUMBERS,
 	PROP_SHOW_LINE_MARKS,
+	PROP_SHOW_CODE_FOLDING,
 	PROP_TAB_WIDTH,
 	PROP_INDENT_WIDTH,
 	PROP_AUTO_INDENT,
@@ -140,6 +142,7 @@ struct _GtkSourceViewPrivate
 
 	GtkSourceGutterRenderer *line_renderer;
 	GtkSourceGutterRenderer *marks_renderer;
+	GtkSourceGutterRenderer *folds_renderer;
 
 	GdkRGBA          current_line_color;
 
@@ -156,6 +159,7 @@ struct _GtkSourceViewPrivate
 	guint            tabs_set : 1;
 	guint            show_line_numbers : 1;
 	guint            show_line_marks : 1;
+	guint            show_code_folding : 1;
 	guint            auto_indent : 1;
 	guint            insert_spaces : 1;
 	guint            highlight_current_line : 1;
@@ -332,6 +336,21 @@ gtk_source_view_class_init (GtkSourceViewClass *klass)
 					 g_param_spec_boolean ("show-line-marks",
 							       _("Show Line Marks"),
 							       _("Whether to display line mark pixbufs"),
+							       FALSE,
+							       G_PARAM_READWRITE));
+
+	/**
+	 * GtkSourceView:show-code-folding:
+	 *
+	 * Whether to display code folding.
+	 *
+	 * Since: 3.12
+	 */
+	g_object_class_install_property (object_class,
+					 PROP_SHOW_CODE_FOLDING,
+					 g_param_spec_boolean ("show-code-folding",
+							       _("Show Code Folding"),
+							       _("Whether to display code folding"),
 							       FALSE,
 							       G_PARAM_READWRITE));
 
@@ -782,6 +801,11 @@ gtk_source_view_set_property (GObject      *object,
 							     g_value_get_boolean (value));
 			break;
 
+		case PROP_SHOW_CODE_FOLDING:
+			gtk_source_view_set_show_code_folding (view,
+							       g_value_get_boolean (value));
+			break;
+
 		case PROP_TAB_WIDTH:
 			gtk_source_view_set_tab_width (view,
 						       g_value_get_uint (value));
@@ -865,6 +889,11 @@ gtk_source_view_get_property (GObject    *object,
 		case PROP_SHOW_LINE_MARKS:
 			g_value_set_boolean (value,
 					     gtk_source_view_get_show_line_marks (view));
+			break;
+
+		case PROP_SHOW_CODE_FOLDING:
+			g_value_set_boolean (value,
+					     gtk_source_view_get_show_code_folding (view));
 			break;
 
 		case PROP_TAB_WIDTH:
@@ -2654,6 +2683,62 @@ gtk_source_view_set_show_line_marks (GtkSourceView *view,
 	view->priv->show_line_marks = show;
 
 	g_object_notify (G_OBJECT (view), "show_line_marks");
+}
+
+/**
+ * gtk_source_view_get_show_code_folding:
+ * @view: a #GtkSourceView.
+ *
+ * Returns: whether to show code folding.
+ * Since: 3.12
+ */
+gboolean
+gtk_source_view_get_show_code_folding (GtkSourceView *view)
+{
+	g_return_val_if_fail (GTK_SOURCE_IS_VIEW (view), FALSE);
+
+	return view->priv->show_code_folding;
+}
+
+/**
+ * gtk_source_view_set_show_code_folding:
+ * @view: a #GtkSourceView.
+ * @show: the setting.
+ *
+ * Sets whether to show code folding.
+ *
+ * Since: 3.12
+ */
+void
+gtk_source_view_set_show_code_folding (GtkSourceView *view,
+				       gboolean       show)
+{
+	g_return_if_fail (GTK_SOURCE_IS_VIEW (view));
+
+	show = show != FALSE;
+
+	if (show == view->priv->show_code_folding)
+	{
+		return;
+	}
+
+	if (view->priv->folds_renderer == NULL)
+	{
+		GtkSourceGutter *gutter;
+
+		gutter = gtk_source_view_get_gutter (view, GTK_TEXT_WINDOW_LEFT);
+
+		view->priv->folds_renderer = gtk_source_gutter_renderer_folds_new ();
+
+		gtk_source_gutter_insert (gutter,
+		                          view->priv->folds_renderer,
+		                          GTK_SOURCE_VIEW_GUTTER_POSITION_FOLDING);
+	}
+
+	gtk_source_gutter_renderer_set_visible (view->priv->folds_renderer, show);
+	view->priv->show_code_folding = show;
+
+	g_object_notify (G_OBJECT (view), "show-code-folding");
 }
 
 static gboolean

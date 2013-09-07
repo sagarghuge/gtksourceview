@@ -32,7 +32,6 @@ libgtksourceview_headers =			\
 	gtksourcecompletionprovider.h		\
 	gtksourcegutter.h			\
 	gtksourcegutterrenderer.h		\
-	gtksourcegutterrendererfolds.h		\
 	gtksourcegutterrendererpixbuf.h		\
 	gtksourcegutterrenderertext.h		\
 	gtksourcelanguage.h			\
@@ -58,6 +57,7 @@ libgtksourceview_private_headers = \
 	gtksourcecontextengine.h		\
 	gtksourceengine.h			\
 	gtksourcegutter-private.h		\
+	gtksourcegutterrendererfolds.h		\
 	gtksourcegutterrendererlines.h		\
 	gtksourcegutterrenderermarks.h		\
 	gtksourcegutterrenderer-private.h	\
@@ -77,6 +77,7 @@ libgtksourceview_private_c_files = \
 	gtksourcecompletionmodel.c	\
 	gtksourcecontextengine.c	\
 	gtksourceengine.c		\
+	gtksourcegutterrendererfolds.c	\
 	gtksourcegutterrendererlines.c	\
 	gtksourcegutterrenderermarks.c	\
 	gtksourcelanguage-parser-1.c	\
@@ -100,7 +101,6 @@ libgtksourceview_c_files = \
 	gtksourcecompletionprovider.c	\
 	gtksourcegutter.c		\
 	gtksourcegutterrenderer.c	\
-	gtksourcegutterrendererfolds.c	\
 	gtksourcegutterrendererpixbuf.c	\
 	gtksourcegutterrenderertext.c	\
 	gtksourcelanguage.c 		\

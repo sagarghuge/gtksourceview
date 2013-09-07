@@ -30,6 +30,7 @@ typedef struct _GtkSourceCompletionContainer	GtkSourceCompletionContainer;
 typedef struct _GtkSourceCompletionModel	GtkSourceCompletionModel;
 typedef struct _GtkSourceContextEngine		GtkSourceContextEngine;
 typedef struct _GtkSourceEngine			GtkSourceEngine;
+typedef struct _GtkSourceGutterRendererFolds	GtkSourceGutterRendererFolds;
 typedef struct _GtkSourceGutterRendererLines	GtkSourceGutterRendererLines;
 typedef struct _GtkSourceGutterRendererMarks	GtkSourceGutterRendererMarks;
 typedef struct _GtkSourceMarksSequence		GtkSourceMarksSequence;

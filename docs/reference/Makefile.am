@@ -32,6 +32,7 @@ IGNORE_HFILES =					\
 	gtksourcecontextengine.h		\
 	gtksourceengine.h			\
 	gtksourcegutter-private.h		\
+	gtksourcegutterrendererfolds.h		\
 	gtksourcegutterrendererlines.h		\
 	gtksourcegutterrenderermarks.h		\
 	gtksourcegutterrenderer-private.h	\
