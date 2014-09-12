@@ -60,7 +60,9 @@
  * # GtkSourceView as GtkBuildable
  *
  * The GtkSourceView implementation of the #GtkBuildable interface exposes the
- * #GtkSourceView:completion object with the internal-child "completion".
+ * #GtkSourceView:completion object with the internal-child "completion". The
+ * gutters are exposed with the internal-child "left_gutter" and "right_gutter"
+ * (see gtk_source_view_get_gutter()).
  *
  * An example of a UI definition fragment with GtkSourceView:
  * |[
@@ -779,6 +781,14 @@ gtk_source_view_buildable_get_internal_child (GtkBuildable *buildable,
 	if (g_strcmp0 (childname, "completion") == 0)
 	{
 		return G_OBJECT (gtk_source_view_get_completion (view));
+	}
+	if (g_strcmp0 (childname, "left_gutter") == 0)
+	{
+		return G_OBJECT (gtk_source_view_get_gutter (view, GTK_TEXT_WINDOW_LEFT));
+	}
+	if (g_strcmp0 (childname, "right_gutter") == 0)
+	{
+		return G_OBJECT (gtk_source_view_get_gutter (view, GTK_TEXT_WINDOW_RIGHT));
 	}
 
 	return NULL;
