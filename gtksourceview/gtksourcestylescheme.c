@@ -709,10 +709,6 @@ _gtk_source_style_scheme_apply (GtkSourceStyleScheme *scheme,
 	/* See https://bugzilla.gnome.org/show_bug.cgi?id=708583 */
 	gtk_style_context_invalidate (context);
 	G_GNUC_END_IGNORE_DEPRECATIONS;
-
-	style = gtk_source_style_scheme_get_style (scheme, STYLE_CURSOR);
-	style2 = gtk_source_style_scheme_get_style (scheme, STYLE_SECONDARY_CURSOR);
-	update_cursor_colors (widget, style, style2);
 }
 
 /**
@@ -741,8 +737,6 @@ _gtk_source_style_scheme_unapply (GtkSourceStyleScheme *scheme,
 	/* See https://bugzilla.gnome.org/show_bug.cgi?id=708583 */
 	gtk_style_context_invalidate (context);
 	G_GNUC_END_IGNORE_DEPRECATIONS;
-
-	update_cursor_colors (widget, NULL, NULL);
 }
 
 /* --- PARSER ---------------------------------------------------------------- */
@@ -823,6 +817,12 @@ generate_css_style (GtkSourceStyleScheme *scheme)
 	if (style2 == NULL)
 		style2 = style;
 	append_css_style (final_style, style2, ".view:selected");
+
+	/* TODO cursor style here */
+	style = gtk_source_style_scheme_get_style (scheme, STYLE_CURSOR);
+	style2 = gtk_source_style_scheme_get_style (scheme, STYLE_SECONDARY_CURSOR);
+	append_css_style (final_style, style, "??");
+	update_cursor_colors (widget, style, style2);
 
 	/* For now we use "line numbers" colors for all the gutters */
 	style = gtk_source_style_scheme_get_style (scheme, STYLE_LINE_NUMBERS);
